@@ -12,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/pkg/profile"
 )
 
 func readFilesPath() ([]string, error) {
@@ -122,6 +124,7 @@ func indexJson(jsonData []byte) {
 }
 
 func main() {
+	defer profile.Start(profile.CPUProfile).Stop()
 	files, err := readFilesPath()
 	if err != nil {
 		fmt.Println("error al leer archivos de la carpeta maildir: ", err)
@@ -133,4 +136,5 @@ func main() {
 		fmt.Println("indexing: ", file)
 		indexJson(jsonData)
 	}
+
 }
