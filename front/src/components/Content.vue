@@ -1,21 +1,22 @@
 <script setup lang="ts">
 import Search from "./Search.vue"
 import { ref, Ref } from "vue"
+import RootObject from "../services/searchService/interface";
 
-const items: Ref = ref()
-function selectData(emitData) {
+const items = ref()
+function selectData(emitData: RootObject) {
     items.value = emitData.hits.hits
 }
 
-const body: Ref<string> = ref("")
-function reqBody(ev) {
-    body.value = ev.currentTarget.childNodes[4].textContent
+const body: Ref<string | null> = ref("")
+function reqBody(ev:MouseEvent) {
+    body.value = (<HTMLTableRowElement>ev.currentTarget).childNodes[4].textContent
 }
 </script>
 
 <template>
     <div>
-    <Search class="hola" @reqData="selectData" />
+    <Search class="searchPosition" @reqData="selectData" />
 
     <table class="styled-table">
         <thead>
@@ -43,14 +44,14 @@ function reqBody(ev) {
 </template>
 
 <style scoped>
-.hola{
+.searchPosition{
     position:relative;
     top: 20px;
 
 }
 div{
     background-color: #111827;
-    height: 600px;
+    height: 1500px;
 }
 .styled-table {
     border-collapse: collapse;
