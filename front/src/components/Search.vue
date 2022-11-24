@@ -24,7 +24,6 @@ const req = async () => {
             "query": {
                 "match_phrase": {
                     "Body": inputSearchElem.value.value
-
                 }
             }
         }),
@@ -44,7 +43,7 @@ const req = async () => {
 <template>
     <section class="main-search">
         <button @click="req"><span class="material-icons-round main-search__search-icon">search</span></button>
-        <input class="main-search__input" type="text" ref="inputSearchElem">
+        <input class="main-search__input" type="text" placeholder="search email message" ref="inputSearchElem">
     </section>
 </template>
 

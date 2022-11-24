@@ -2,9 +2,9 @@
 import Search from "./Search.vue"
 import { ref, Ref } from "vue"
 
-const items = ref()
-function selectData(reqData) {
-    items.value = reqData.hits.hits
+const items: Ref = ref()
+function selectData(emitData) {
+    items.value = emitData.hits.hits
 }
 
 const body: Ref<string> = ref("")
@@ -15,7 +15,7 @@ function reqBody(ev) {
 
 <template>
     <div>
-    <Search @reqData="selectData" />
+    <Search class="hola" @reqData="selectData" />
 
     <table class="styled-table">
         <thead>
@@ -43,13 +43,14 @@ function reqBody(ev) {
 </template>
 
 <style scoped>
+.hola{
+    position:relative;
+    top: 20px;
 
-Search{
-    
 }
-
 div{
     background-color: #111827;
+    height: 600px;
 }
 .styled-table {
     border-collapse: collapse;
