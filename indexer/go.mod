@@ -1,4 +1,4 @@
-module indexer
+module indexerZinc
 
 go 1.19
 
