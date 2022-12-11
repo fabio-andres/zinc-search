@@ -32,15 +32,21 @@ func ReadFilesPath() ([]string, error) {
 func ReadFilesLines(file string) []string {
 	var fileLines []string
 
+	//os.Open() abre el archivo que se le pase como parametro y retorna el archivo ya abierto. esto es necesario para poder acceder al contenido de un archivo
 	readFile, err := os.Open(file)
-
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	//bufio.NewScanner() crea un objeto scanner inicializando su atributo r de tipo io.Reader con el archivo de texto abierto que se le pase como parametro
 	fileScanner := bufio.NewScanner(readFile)
+
+	//Split(bufio.ScanLines) añade un token a cada renglon del archivo para que el metodo Scan() solo detecte renglones
 	fileScanner.Split(bufio.ScanLines)
 
+	//Scan() escanea el archivo tal como se indico con Split(bufio.ScanLines), osea Scan() escanea renglon por renglon del archivo
 	for fileScanner.Scan() {
+		//Text() convierte un renglon en string
 		fileLines = append(fileLines, fileScanner.Text())
 	}
 
