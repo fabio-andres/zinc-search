@@ -12,11 +12,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
+	"zse/types"
 )
 
 func ReadFilesPath() ([]string, error) {
-	mainFolder := "enronDB/maildirComplete"
+	mainFolder := "enronDB/maildir"
 	files := []string{}
 	//el parametro path string es la ruta de cada archivo o carpeta dentro de la carpeta mainFolder que se paso como paraemtro. cada vez que el metodo filepath.WalkDir() encuentre una carpeta o archivo dentro de la ruta que esta en el parametro mainFolder entonces ejecutara el callback func(path string, info fs.DirEntry, err error)
 	err := filepath.WalkDir(mainFolder, func(path string, info fs.DirEntry, err error) error {
@@ -49,74 +49,83 @@ func ReadFilesLines(file string) []string {
 	return fileLines //retorna un slice donde cada elemento es un renglon del archivo
 }
 
-func LinesToJson(lines []string) []byte {
-	mapData := make(map[string]string)
-
+func LinesToStruct(lines []string, dataStr types.Data) types.Data {
+	//line representa un renglon de un archivo representado por lines
 	for _, line := range lines {
 		switch 0 {
+		//si en el line (renglon) del archivo se halla la palabra Message-ID retornar la posicion del renglon donde inicia esa palabra
 		case strings.Index(line, "Message-ID:"):
-			mapData["Message-ID"] = line[11:len(line)]
+			dataStr.MessageID = line[11:len(line)]
 		case strings.Index(line, "Date:"):
-			mapData["Date"] = line[5:len(line)]
+			dataStr.Date = line[5:len(line)]
 		case strings.Index(line, "From:"):
-			mapData["From"] = line[5:len(line)]
+			dataStr.From = line[5:len(line)]
 		case strings.Index(line, "To:"):
-			mapData["To"] = line[3:len(line)]
+			dataStr.To = line[3:len(line)]
 		case strings.Index(line, "Subject:"):
-			mapData["Subject"] = line[8:len(line)]
+			dataStr.Subject = line[8:len(line)]
 		case strings.Index(line, "Cc:"):
-			mapData["Cc"] = line[3:len(line)]
+			dataStr.Cc = line[3:len(line)]
 		case strings.Index(line, "Mime-Version:"):
-			mapData["Mime-Version"] = line[13:len(line)]
+			dataStr.MimeVersion = line[13:len(line)]
 		case strings.Index(line, "Content-Type:"):
-			mapData["Content-Type"] = line[13:len(line)]
+			dataStr.ContentType = line[13:len(line)]
 		case strings.Index(line, "Content-Transfer-Encoding:"):
-			mapData["Content-Transfer-Encoding"] = line[26:len(line)]
+			dataStr.ContentTransferEncoding = line[26:len(line)]
 		case strings.Index(line, "X-From:"):
-			mapData["X-From"] = line[7:len(line)]
+			dataStr.XFrom = line[7:len(line)]
 		case strings.Index(line, "X-To:"):
-			mapData["X-To"] = line[5:len(line)]
+			dataStr.XTo = line[5:len(line)]
 		case strings.Index(line, "X-cc:"):
-			mapData["X-cc"] = line[5:len(line)]
+			dataStr.Xcc = line[5:len(line)]
 		case strings.Index(line, "X-bcc:"):
-			mapData["X-bcc"] = line[6:len(line)]
+			dataStr.Xbcc = line[6:len(line)]
 		case strings.Index(line, "X-Folder:"):
-			mapData["X-Folder"] = line[9:len(line)]
+			dataStr.XFolder = line[9:len(line)]
 		case strings.Index(line, "X-Origin:"):
-			mapData["X-Origin"] = line[9:len(line)]
+			dataStr.XOrigin = line[9:len(line)]
 		case strings.Index(line, "X-FileName:"):
-			mapData["X-FileName"] = line[11:len(line)]
+			dataStr.XFileName = line[11:len(line)]
 		default:
-			mapData["Body"] += line
+			//el line (renglon) se concatena con el anterior line
+			dataStr.Body += line
 		}
 	}
+	return dataStr
+}
 
-	jsonData, err := json.Marshal(mapData) //convierte el map en un json
+func StructToJson(lineData types.DataEnron) []byte {
+	jsonData, err := json.Marshal(lineData) //convierte el struct en un json
 	if err != nil {
 		fmt.Printf("Error: %s", err.Error())
 	}
 	return jsonData
 }
 
-func IndexJson(jsonData []byte, clientHttp *http.Client, wg *sync.WaitGroup) {
-	defer wg.Done()
+func IndexJson(jsonData []byte, clientHttp *http.Client) {
 	user := "admin"
 	password := "Complexpass#123"
 	encodeCredentials := base64.StdEncoding.EncodeToString([]byte(user + ":" + password))
 
-	url := "http://localhost:4080/api/enron1/_doc"
+	url := "http://localhost:4080/api/_bulkv2"
 
-	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Fatalf("Error creando petición: %v", err)
 	}
 
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Basic "+encodeCredentials)
-	_, err = clientHttp.Do(req)
+	resp, err := clientHttp.Do(req)
 	if err != nil {
-
 		log.Fatalf("Error haciendo petición: %v", err)
 	}
 
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 200 {
+		fmt.Println("request successful", resp.Status)
+	} else {
+		fmt.Println(resp.Status)
+	}
 }
