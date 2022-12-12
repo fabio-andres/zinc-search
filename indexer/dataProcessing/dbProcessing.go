@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -134,4 +135,11 @@ func IndexJson(jsonData []byte, clientHttp *http.Client) {
 	} else {
 		fmt.Println(resp.Status)
 	}
+
+	bodyResp, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Error leyendo respuesta: %v", err)
+	}
+
+	fmt.Println(string(bodyResp))
 }

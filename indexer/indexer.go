@@ -11,8 +11,6 @@ import (
 )
 
 func main() {
-	//wg := new(sync.WaitGroup)
-	//wg.Add(517_424)
 	defer profile.Start(profile.CPUProfile).Stop()
 	files, err := dataProcessing.ReadFilesPath()
 	if err != nil {
@@ -24,9 +22,13 @@ func main() {
 		Records: []types.Record{},
 	}
 	var dataStr types.Data
+	var count int = 0
 	for _, file := range files {
-		lines := dataProcessing.ReadFilesLines(file) //lines es un slice de string donde cada elemento es un renglon del archivo
+
+		//lines es un slice de string donde cada elemento es un renglon del archivo
+		lines := dataProcessing.ReadFilesLines(file)
 		dataString := dataProcessing.LinesToStruct(lines, dataStr)
+
 		//se agrega un objeto Data al slice []Record
 		lineData.Records = append(lineData.Records, types.Record{
 			Document: types.Data{
@@ -49,16 +51,15 @@ func main() {
 				Body:                    dataString.Body,
 			},
 		})
-		fmt.Println("line appended")
+		count++
+		fmt.Println("file appended", count)
 	}
 
 	jsonData := dataProcessing.StructToJson(*lineData)
-
-	fmt.Println(string(jsonData))
-
 	clientHttp := &http.Client{
 		Timeout: time.Second * 10,
 	}
+	fmt.Println("indexing data")
 	dataProcessing.IndexJson(jsonData, clientHttp)
 
 }
