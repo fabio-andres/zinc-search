@@ -2,18 +2,16 @@
 import { ref, Ref, onMounted } from "vue"
 import RootObject from "../services/searchService/interface";
 
-const inputSearchElem: Ref<null> = ref(null)
-onMounted(() => {
-    inputSearchElem.value
-})
-
+//text esta enlazada al atributo value del elemento html <input> usado dentro de <template>, osea text contiene el texto ingresado en un elemento <input>
+const text: Ref<string> = ref("")
 const emit = defineEmits(['reqData'])
 
 const req = async () => {
     const user: string = "admin"
-    const password: string = "Complexpass#123"
+    const password: string = import.meta.env.VITE_ZINC_SEARCH_PASSWORD
     const encodeCredentials: string = btoa(user + ":" + password)
-    const url: string = 'http://localhost:4080/es/enron1/_search'
+    const url: string = import.meta.env.VITE_URL
+    
     const reqOptions = {
         method: "POST",
         headers: {
@@ -23,7 +21,7 @@ const req = async () => {
         body: JSON.stringify({
             "query": {
                 "match_phrase": {
-                    "Body": inputSearchElem.value.value
+                    "document.Body": text.value
                 }
             }
         }),
@@ -31,8 +29,14 @@ const req = async () => {
 
     try {
         const res = await fetch(url, reqOptions)
-        const data:Promise<RootObject> = await res.json();
-        emit("reqData", data)
+        const data: Promise<RootObject> = await res.json();
+        if (res.status === 200) {
+            console.log("request successful", res.status, res.statusText)
+            emit("reqData", data)
+        } else {
+            console.log(res.status, res.statusText)
+        }
+        console.log(data)
     } catch (error) {
         console.log('error al consumir api', error);
     }
@@ -43,19 +47,21 @@ const req = async () => {
 <template>
     <section class="main-search">
         <button @click="req"><span class="material-icons-round main-search__search-icon">search</span></button>
-        <input class="main-search__input" type="text" placeholder="search email message" ref="inputSearchElem">
+        <input class="main-search__input" type="text" placeholder="search email message" v-model="text">
     </section>
 </template>
 
 <style scoped>
-span{
+span {
     color: #6366f1;
     font-size: 27px;
 }
+
 span:hover {
     box-shadow: 0 2px 12px gray;
     cursor: pointer;
 }
+
 .main-search {
     background-color: #111827;
     width: 580px;
@@ -95,5 +101,4 @@ button {
     background-color: #111827;
     border: none;
 }
-
 </style>

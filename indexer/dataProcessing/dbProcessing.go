@@ -111,7 +111,7 @@ func StructToJson(lineData types.DataEnron) []byte {
 
 func IndexJson(jsonData []byte, clientHttp *http.Client) {
 	user := "admin"
-	password := "Complexpass#123"
+	password := os.Getenv("ZINC_SEARCH_PASSWORD")
 	encodeCredentials := base64.StdEncoding.EncodeToString([]byte(user + ":" + password))
 
 	url := "http://localhost:4080/api/_bulkv2"

@@ -2,13 +2,22 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 	"zse/dataProcessing"
 	"zse/types"
 
+	"github.com/joho/godotenv"
 	"github.com/pkg/profile"
 )
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+}
 
 func main() {
 	defer profile.Start(profile.CPUProfile).Stop()

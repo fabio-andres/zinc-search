@@ -5,11 +5,13 @@ import RootObject from "../services/searchService/interface";
 
 const items = ref()
 function selectData(emitData: RootObject) {
+    //a la variable reactiva items se le asigna emitData el cual es el body de la peticion que se hizo. la informacion que se necesita de ese body esta dentro de un objeto hits que contiene un atributo tambien llamado hits el cual es un array. los elementos de ese array llamado hits son los que se necesitan mostrar en pantalla en una tabla
     items.value = emitData.hits.hits
 }
 
 const body: Ref<string | null> = ref("")
 function reqBody(ev:MouseEvent) {
+    //al dar click en una fila de la tabla se obtiene el texto de la columna 4 correspondiente a esa fila. dicho texto corresponde a la variable {{ v._source.document.Body }}
     body.value = (<HTMLTableRowElement>ev.currentTarget).childNodes[4].textContent
 }
 </script>
@@ -28,13 +30,14 @@ function reqBody(ev:MouseEvent) {
             </tr>
         </thead>
         <tbody>
+            <!--items contiene un array con los datos que se necesitan mostrar en pantalla en una tabla. como el dato {{ v._source.document.Body }} esta dentro de una etiqueta <template>, entonces dicho dato no se renderiza en la tabla. esto se hace asi porque este dato se necesita almacenarlo en una variable pero no se necesita mostrarlo en la tabla -->
             <tr v-for="v in items" @click="reqBody">
-                <td> {{ v._source.Subject }}</td>
-                <td> {{ v._source.From }}</td>
-                <td> {{ v._source.To }}</td>
-                <td> {{ v._source.Date }}</td>
+                <td> {{ v._source.document.Subject }}</td>
+                <td> {{ v._source.document.From }}</td>
+                <td> {{ v._source.document.To }}</td>
+                <td> {{ v._source.document.Date }}</td>
                 <template>
-                    <td> {{ v._source.Body }}</td>
+                    <td> {{ v._source.document.Body }}</td>
                 </template>
             </tr>
         </tbody>
