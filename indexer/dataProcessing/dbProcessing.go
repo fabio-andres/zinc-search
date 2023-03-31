@@ -56,12 +56,14 @@ func ReadFilesLines(file string) []string {
 	return fileLines //retorna un slice donde cada elemento es un renglon del archivo
 }
 
+// lines es un slice de string que contiene como elementos todos los renglones de un archivo, osea cada elemento es un renglon de un archivo
 func LinesToStruct(lines []string, dataStr types.Data) types.Data {
-	//line representa un renglon de un archivo representado por lines
+	//line es un elemento del slice lines, osea line es un string que representa un renglon del archivo representado por lines
 	for _, line := range lines {
 		switch 0 {
-		//si en el line (renglon) del archivo se halla la palabra Message-ID retornar la posicion del renglon donde inicia esa palabra
+		//si en el sline (renglon) que es un string se halla la palabra Message-ID retornar la posicion de ese string donde inicia la palabra Message-ID por lo tanto el case sera true
 		case strings.Index(line, "Message-ID:"):
+			//todo el string que haya despues de Message-ID: se asigna al atributo dataStr.MessageID
 			dataStr.MessageID = line[11:len(line)]
 		case strings.Index(line, "Date:"):
 			dataStr.Date = line[5:len(line)]
@@ -94,15 +96,17 @@ func LinesToStruct(lines []string, dataStr types.Data) types.Data {
 		case strings.Index(line, "X-FileName:"):
 			dataStr.XFileName = line[11:len(line)]
 		default:
-			//el line (renglon) se concatena con el anterior line
+			//el line (renglon) se concatena con el anterior line (renglon)
 			dataStr.Body += line
 		}
 	}
+	//se retorna un objeto dataStr con todos sus atributos inicializados
 	return dataStr
 }
 
+// convierte el struct en un json para poder enviar ese json en una peticion http
 func StructToJson(lineData types.DataEnron) []byte {
-	jsonData, err := json.Marshal(lineData) //convierte el struct en un json
+	jsonData, err := json.Marshal(lineData)
 	if err != nil {
 		fmt.Printf("Error: %s", err.Error())
 	}
