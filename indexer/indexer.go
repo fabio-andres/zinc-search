@@ -75,6 +75,8 @@ func main() {
 		Timeout: time.Second * 10,
 	}
 	fmt.Println("indexing data")
+
+	//se hace una sola peticion con todos los archivos que se indexaran en la db en lugar de hacer varias peticiones por cada archivo
 	dataProcessing.IndexJson(jsonData, clientHttp)
 
 }
